@@ -34,17 +34,15 @@ func main() {
 			}
 		}
 
-		p := make([][]float64, b) //储存dn值缓冲区
-
 		minMax := make([][]float64, b) //储存每个波段DN值的最大值与最小值
 
 		wg.Add(b)
 
 		for i := 0; i < b; i++ {
-			p[i] = make([]float64, x*y, x*y)
+
 			minMax[i] = make([]float64, 2)
 			band := ds.RasterBand(i + 1)
-			go ReadDataFromBand(band, x, y, p[i], minMax[i], img[i])
+			go ReadDataFromBand(band, x, y, minMax[i], img[i])
 		}
 
 		wg.Wait()
@@ -57,7 +55,8 @@ func main() {
 
 }
 
-func ReadDataFromBand(band gdal.RasterBand, x, y int, p, minMax []float64, img [][]float64) {
+func ReadDataFromBand(band gdal.RasterBand, x, y int, minMax []float64, img [][]float64) {
+	p := make([]float64, x*y, x*y)
 	band.IO(gdal.Read, 0, 0, x, y, p, x, y, 0, 0) //从raster里取数据到缓冲区
 	minMax[0], _ = band.GetMinimum()
 	minMax[1], _ = band.GetMaximum()
